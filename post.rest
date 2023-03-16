@@ -1,0 +1,7 @@
+POST http://localhost:5000/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "amount": "33",
+    "percentage": "5.5" 
+}

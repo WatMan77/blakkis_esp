@@ -1,11 +1,11 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 
-const char* ssid = "FD-35";
-const char* password = "salasana";
+const char* ssid = "INSERT SSID HERE";
+const char* password = "";
 
 //Your Domain name with URL path or IP address with path
-String serverName = "http://192.168.1.106:1880/update-sensor";
+String serverName = "INSERT IP ADDRESS HERE";
 
 // the following variables are unsigned longs because the time, measured in
 // milliseconds, will quickly become a bigger number than can be stored in an int.
@@ -36,18 +36,19 @@ void loop() {
   if ((millis() - lastTime) > timerDelay) {
     //Check WiFi connection status
     if(WiFi.status()== WL_CONNECTED){
+      
       HTTPClient http;
 
-      String serverPath = serverName + "?temperature=24.37";
+      String serverPath = serverName;
+
+      String jsondata = "{\"amount\":\"33\",\"percentage\":\"5.5\"}";
       
       // Your Domain name with URL path or IP address with path
       http.begin(serverPath.c_str());
-      
-      // If you need Node-RED/server authentication, insert user and password below
-      //http.setAuthorization("REPLACE_WITH_SERVER_USERNAME", "REPLACE_WITH_SERVER_PASSWORD");
-      
-      // Send HTTP GET request
-      int httpResponseCode = http.GET();
+
+      http.addHeader("Content-Type", "application/json");
+
+      int httpResponseCode = http.POST(jsondata);
       
       if (httpResponseCode>0) {
         Serial.print("HTTP Response code: ");
