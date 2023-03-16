@@ -1,11 +1,11 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 
-const char* ssid = "INSERT SSID HERE";
+const char* ssid = "aalto open";
 const char* password = "";
 
 //Your Domain name with URL path or IP address with path
-String serverName = "INSERT IP ADDRESS HERE";
+String serverName = "http://10.100.36.137:5000";
 
 // the following variables are unsigned longs because the time, measured in
 // milliseconds, will quickly become a bigger number than can be stored in an int.
@@ -31,17 +31,13 @@ void setup() {
   Serial.println("Timer set to 5 seconds (timerDelay variable), it will take 5 seconds before publishing the first reading.");
 }
 
-void loop() {
-  //Send an HTTP POST request every 10 minutes
-  if ((millis() - lastTime) > timerDelay) {
-    //Check WiFi connection status
-    if(WiFi.status()== WL_CONNECTED){
-      
+void sendDrink(String amount, String percentage){
       HTTPClient http;
 
       String serverPath = serverName;
 
-      String jsondata = "{\"amount\":\"33\",\"percentage\":\"5.5\"}";
+      String jsondata = "{\"amount\":\"" + amount + "\",\"percentage\":\"" + percentage + "\"}";
+
       
       // Your Domain name with URL path or IP address with path
       http.begin(serverPath.c_str());
@@ -49,10 +45,12 @@ void loop() {
       http.addHeader("Content-Type", "application/json");
 
       int httpResponseCode = http.POST(jsondata);
+
+      Serial.println("JSON sent");
+      Serial.println("Status?");
+      Serial.println(httpResponseCode);
       
       if (httpResponseCode>0) {
-        Serial.print("HTTP Response code: ");
-        Serial.println(httpResponseCode);
         String payload = http.getString();
         Serial.println(payload);
       }
@@ -62,6 +60,17 @@ void loop() {
       }
       // Free resources
       http.end();
+  
+}
+
+void loop() {
+  //Serial.println("Looping");
+  //Send an HTTP POST request every 10 minutes
+  if ((millis() - lastTime) > timerDelay) {
+    //Check WiFi connection status
+    if(WiFi.status()== WL_CONNECTED){
+      
+      sendDrink("33", "5.5");
     }
     else {
       Serial.println("WiFi Disconnected");
