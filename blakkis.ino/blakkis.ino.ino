@@ -16,7 +16,9 @@ unsigned long lastTime = 0;
 unsigned long timerDelay = 5000;
 
 const int beerPin = 13;
+const int boozePin = 14;
 
+bool boozeButtonPressed = false;
 bool beerButtonPressed = false;
 
 void setup() {
@@ -35,7 +37,7 @@ void setup() {
   Serial.println("Timer set to 5 seconds (timerDelay variable), it will take 5 seconds before publishing the first reading.");
 
   pinMode(beerPin, INPUT);
-  // digitalWrite(beerPin, HIGH);
+  pinMode(boozePin, INPUT);
 }
 
 void sendDrink(String amount, String percentage){
@@ -82,6 +84,14 @@ void loop() {
       sendDrink("33", "5.5");
     } else {
       beerButtonPressed = false;
+    }
+
+    // The booze button had it's soldering the other way around
+    if(digitalRead(boozePin) == HIGH && !boozeButtonPressed){
+      boozeButtonPressed = true;
+      sendDrink("40", "20");
+    } else {
+      boozeButtonPressed = false;
     }
   }
   else {
