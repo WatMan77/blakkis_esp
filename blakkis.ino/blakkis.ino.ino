@@ -17,9 +17,12 @@ unsigned long timerDelay = 5000;
 
 const int beerPin = 13;
 const int boozePin = 14;
+const int gambinaPin = 15;
 
 bool boozeButtonPressed = false;
 bool beerButtonPressed = false;
+bool gambinaButtonPressed = false;
+
 
 void setup() {
   Serial.begin(115200); 
@@ -38,6 +41,7 @@ void setup() {
 
   pinMode(beerPin, INPUT);
   pinMode(boozePin, INPUT);
+  pinMode(gambinaPin, INPUT);
 }
 
 void sendDrink(String amount, String percentage){
@@ -92,6 +96,13 @@ void loop() {
       sendDrink("40", "20");
     } else {
       boozeButtonPressed = false;
+    }
+
+    if(digitalRead(gambinaPin) == HIGH && !gambinaButtonPressed){
+      gambinaButtonPressed = true;
+      sendDrink("21", "20");
+    } else {
+      gambinaButtonPressed = false;
     }
   }
   else {
