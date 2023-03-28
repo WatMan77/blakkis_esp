@@ -28,11 +28,27 @@ else:
 
 app = Flask(__name__)
 
+chatId = environ["BLAKKIS_CHAT_ID"]
+
 def getLastMessage():
     tg.get_chats().wait()
-    history = tg.get_chat_history(environ["BLAKKIS_CHAT_ID"])
+    history = tg.get_chat_history(chatId)
     history.wait()
-    print(history.update["messages"][0]["content"]["text"]["text"])
+    msg = history.update["messages"][0]["content"]["text"]["text"]
+    print(msg)
+    return msg
+
+# This is to make sure you can add drinks with just the amount + cl + " " + percentage + %
+# You need to add a drink using the menu and not with the "Oma" option
+def firstTime(msg, amount, percentage):
+    if "Mitä? Jos kaipaat apua käyttämiseen, kirjoita /help" in msg:
+        tg.send_message(chatId, "/juoma")
+        time.sleep(1)
+        tg.send_message(chatId, "Oma")
+        time.sleep(1)
+        tg.send_message(chatId, percentage)
+        time.sleep(1)
+        tg.send_message(chatId, amount)
 
 
 @app.route('/', methods=['POST'])
@@ -41,9 +57,9 @@ def add_drink():
     amount = data.get('amount')
     percentage = data.get('percentage')
     print(amount + "cl " + percentage)
-    tg.send_message(environ["BLAKKIS_CHAT_ID"], amount + "cl " + percentage + "%")
+    tg.send_message(chatId, amount + "cl " + percentage + "%")
     time.sleep(1)
-    getLastMessage()
+    firstTime(getLastMessage(), amount, percentage)
     return "Thank you"
 
 
