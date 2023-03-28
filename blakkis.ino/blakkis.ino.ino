@@ -18,10 +18,14 @@ unsigned long timerDelay = 5000;
 const int beerPin = 13;
 const int boozePin = 14;
 const int gambinaPin = 15;
+const int modePin = 12;
 
 bool boozeButtonPressed = false;
 bool beerButtonPressed = false;
 bool gambinaButtonPressed = false;
+
+const unsigned int debounceTime = 50;
+unsigned long lastDebounceTime = 0;
 
 
 void setup() {
@@ -42,6 +46,8 @@ void setup() {
   pinMode(beerPin, INPUT);
   pinMode(boozePin, INPUT);
   pinMode(gambinaPin, INPUT);
+  // Pressed == HIGH, Not pressed == LOW
+  pinMode(modePin, INPUT);
 }
 
 void sendDrink(String amount, String percentage){
@@ -76,6 +82,64 @@ void sendDrink(String amount, String percentage){
   
 }
 
+bool isNormalMode(){
+  return digitalRead(modePin) == LOW;
+}
+
+void checkBeer() {
+
+  if(digitalRead(beerPin) == LOW && !beerButtonPressed){
+      Serial.println("SENDING BEER!");
+      beerButtonPressed = true;
+      if(isNormalMode()){
+        sendDrink("33", "5.5");
+      } else {
+        sendDrink("50", "5.5");
+      }
+    }
+
+  if(digitalRead(beerPin) == HIGH){
+    beerButtonPressed = false;
+    lastDebounceTime = millis();
+  }
+}
+
+void checkBooze() {
+
+  // The booze button had it's soldering the other way around
+    if(digitalRead(boozePin) == HIGH && !boozeButtonPressed){
+      Serial.println("SENDING BOOZE");
+      boozeButtonPressed = true;
+      if(isNormalMode()){
+        sendDrink("40", "20");
+      } else {
+        sendDrink("12", "10");
+      }
+    }
+
+    if(digitalRead(boozePin) == LOW){
+      boozeButtonPressed = false;
+      lastDebounceTime = millis();
+    }
+}
+
+void checkGambina() {
+  if(digitalRead(gambinaPin) == HIGH && !gambinaButtonPressed){
+    Serial.println("SENDING GAMBINA!");
+      gambinaButtonPressed = true;
+      if(isNormalMode()){
+        sendDrink("21", "20");
+      } else {
+        sendDrink("15", "20");
+      }
+    }
+
+    if(digitalRead(gambinaPin) == LOW){
+      gambinaButtonPressed = false;
+      lastDebounceTime = millis();
+    }
+}
+
 void loop() {
   //Serial.println("Looping");
   //Send an HTTP POST request every 10 minutes
@@ -83,26 +147,10 @@ void loop() {
   //Check WiFi connection status
   if(WiFi.status()== WL_CONNECTED){
 
-    if(digitalRead(beerPin) == LOW && !beerButtonPressed){
-      beerButtonPressed = true;
-      sendDrink("33", "5.5");
-    } else {
-      beerButtonPressed = false;
-    }
-
-    // The booze button had it's soldering the other way around
-    if(digitalRead(boozePin) == HIGH && !boozeButtonPressed){
-      boozeButtonPressed = true;
-      sendDrink("40", "20");
-    } else {
-      boozeButtonPressed = false;
-    }
-
-    if(digitalRead(gambinaPin) == HIGH && !gambinaButtonPressed){
-      gambinaButtonPressed = true;
-      sendDrink("21", "20");
-    } else {
-      gambinaButtonPressed = false;
+    if(millis() - lastDebounceTime > debounceTime){
+      checkBeer();
+      checkBooze();
+      checkGambina();
     }
   }
   else {
